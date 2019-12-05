@@ -1,0 +1,12 @@
+{
+    "arduino.path": "C:\\Program Files (x86)\\Arduino",
+    "arduino.logLevel": "info",
+    "arduino.enableUSBDetection": true,
+    "arduino.disableTestingOpen": false,
+    "arduino.skipHeaderProvider": false,
+    "arduino.additionalUrls": [
+        "https://adafruit.github.io/arduino-board-index/package_adafruit_index.json"
+    ],
+    "arduino.defaultBaudRate": 115200,
+    "C_Cpp.intelliSenseEngine": "Tag Parser"
+}
