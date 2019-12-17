@@ -7,11 +7,13 @@
     #include "Wire.h"
 #endif
 
+#define LED A4
+
 const uint16_t baseFrequencies[] = {90, 91, 35}
 
 //MPU6050 accelgyro;
 imuTools imu;
-lightsaber lightsaber;
+Lightsaber lightsaber;
 
 ISR(TIMER1_OVF_vect) {
     lightsaber.updateLightsaberState();
@@ -26,13 +28,14 @@ void setup() {
         Fastwire::setup(400, true);
     #endif
 
-    Serial.begin(38400);
+    Serial.begin(115200);
 
     // set up imu
     imu.initialize();
     imu.setOffsets(220, 76, -85);
 
     // set up lightsaber
+    lightsaber.initialize();
     lightsaber.setBaseFrequencies(baseFrequencies);
 }
 

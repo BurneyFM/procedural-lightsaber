@@ -1,5 +1,5 @@
-#ifndef synthesizer_h
-#define synthesizer_h
+#ifndef lightsaber_h
+#define lightsaber_h
 
 #include "waveformTables.h"
 
@@ -10,37 +10,44 @@
     #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
+#define maxNumberFrequencies 3
+
 
 class FrequencySet {
     public:
-        FrequencySet(uint16_t frequencies[]) {
+        FrequencySet(int frequencies[]) {
+
+            int _frequencyCount = 0;
             
-            int frequencyCount = 0;
-
-            for (uint16_t frequency : frequencies) {
-                
-                frequencyCount++;
-                baseFrequency[frequencyCount] = frequency;
-
+            for (int frequency : frequencies) {
+                _frequencyCount++;
             }
 
-            uint16_t currentFrequency[frequencyCount];
-            uint16_t phaseAccumulator[frequencyCount];
-            uint16_t phaseIncrement[frequencyCount];
-            uint64_t phaseIncr64[frequencyCount];
-            uint8_t index[frequencyCount];
+            uint16_t currentFrequency[_frequencyCount] = {0};
+            uint16_t phaseAccumulator[_frequencyCount] = {0};
+            uint16_t phaseIncrement[_frequencyCount] = {0};
+            uint64_t phaseIncr64[_frequencyCount] = {0};
+            uint8_t index[_frequencyCount] = {0};
+
+            for (int i = 0; i < _frequencyCount; i++) {
+                _baseFrequencies[i] = frequencies[i];
+                currentFrequency[i] = frequencies[i];
+            }
+
+            Serial.print("Lightsaber sound frequencies: ");
+            Serial.println(_baseFrequencies);
             
         };
 
-        uint16_t currentFrequency[];
-        uint16_t phaseAccumulator[];
-        uint16_t phaseIncrement[];
-        uint64_t phaseIncr64[];
-        uint8_t index[];
-        int frequencyCount;
+        uint16_t currentFrequency[_frequencyCount];
+        uint16_t phaseAccumulator[_frequencyCount];
+        uint16_t phaseIncrement[_frequencyCount];
+        uint64_t phaseIncr64[_frequencyCount];
+        int index[_frequencyCount];
 
     private:
-        uint16_t baseFrequencies[];
+        int _frequencyCount;
+        int _baseFrequencies[];
 
 };
 
@@ -49,16 +56,16 @@ class Lightsaber {
     public:
         lightsaber();
         void initialize();
-        void setBaseFrequencies();
+        void setBaseFrequencies(int frequencies[]);
+        void prepareSample();
         void updateLightsaberState();
         int getSampleCount();
         void resetSampleCount();
-        bool isEnabled = 0;
+        bool isEnabled = false;
     private:
-        //int _baseFreqencies[];
-        int _sampleCount;
+        int _sampleCount = 0;
         void _initPWM();
-        static int16_t _osc = 0;
+        int16_t _osc = 0;
         int _center;
         const uint32_t _resolution = 68719;
 };

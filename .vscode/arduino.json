@@ -1,5 +1,5 @@
 {
-    "sketch": "lightsaber.ino",
+    "sketch": "main.ino",
     "board": "adafruit:samd:adafruit_trinket_m0",
     "configuration": "usbstack=arduino,debug=on",
     "port": "COM7"

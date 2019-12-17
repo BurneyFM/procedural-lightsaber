@@ -7,38 +7,28 @@ void Lightsaber::initialize() {
     
     _initPWM();
 
-    // TODO
-    center = ...
-
     // set prescale to 16
     sbi(ADCSRA,ADPS2);
     cbi(ADCSRA,ADPS1);
     cbi(ADCSRA,ADPS0);
 
     sei();
+
+    // mean value of osc - fixed for now; dynamic center would require dynamic progmem in waveformTables.h
+    _center = 128 * (127 + 12 + 7)/100;
 }
 
-void Lightsaber::setFrequencies(uint16_t frequencies[]) {
+void Lightsaber::setBaseFrequencies(int frequencies[]) {
 
     FrequencySet frequencySet(frequencies);
 
 }
 
 void Lightsaber::prepareSample() {
-    /* phaseIncr641 = resolution * frequency1;
-    phaseIncrement1 = phaseIncr641 >> 16;
-
-    phaseIncr642 = resolution * frequency2;
-    phaseIncrement2 = phaseIncr642 >> 16;
-
-    phaseIncr643 = resolution * frequency3;
-    phaseIncrement3 = phaseIncr643 >> 16; */
-
-    for (int i : frequencySet.frequencyCount-1) {
+    for (int i = 0; i < frequencySet._frequencyCount; i++) {
         frequencySet.phaseIncr64[i] = _resolution * frequencySet.currentFrequency[i];
         frequencySet.phaseIncrement[i] = frequencySet.phaseIncr64[i] >> 16;
     }
-
 }
 
 void Lightsaber::updateLightsaberState() {
@@ -48,35 +38,29 @@ void Lightsaber::updateLightsaberState() {
         PORTD = _osc;
     }
     else  {
-        PORTD = 0;
         OCR1A = 0;
+        PORTD = 0;
     }
 
     // determine sample position in waveform table
-    /* phaseAccumulator1 += phaseIncrement1;
-    index1 = phaseAccumulator1 >> 8;
-    phaseAccumulator2 += phaseIncrement2;
-    index2 = phaseAccumulator2 >> 8;
-    phaseAccumulator3 += phaseIncrement3;
-    index3 = phaseAccumulator3 >> 8; */
-    for (int i : frequencySet.frequencyCount-1) {
-        frequencySet.index[i] = frequencySet.phaseAccumulator[i] >> 8;
+    for (int i = 0; i < frequencySet._frequencyCount; i++) {
         frequencySet.phaseAccumulator[i] += phaseIncrement[i];
+        frequencySet.index[i] = frequencySet.phaseAccumulator[i] >> 8;
     }
 
 
     // Read oscillator value for next interrupt
-    osc = volume * (
-        pgm_read_byte(&sineTable100[frequencySet.index[1]]) + 
-        pgm_read_byte(&sineTable010[frequencySet.index[2]]) + 
-        pgm_read_byte(&squareTable006[frequencySet.index[3]]
+    _osc = volume * (
+        pgm_read_byte(&sineTable100[frequencySet.index[0]]) + 
+        pgm_read_byte(&sineTable010[frequencySet.index[1]]) + 
+        pgm_read_byte(&squareTable006[frequencySet.index[2]]
         ) - _center);
     
     // clamp _osc
-    if (osc > 127) osc = 127;
-    else if (osc < -128) osc = -128;
+    if (_osc > 127) osc = 127;
+    else if (_osc < -128) osc = -128;
 
-    osc = osc + 128;
+    _osc = _osc + 128;
 
     _sampleCount++;
 }
